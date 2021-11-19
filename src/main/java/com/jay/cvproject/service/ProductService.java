@@ -1,11 +1,19 @@
 package com.jay.cvproject.service;
 
 import com.jay.cvproject.dtos.ProductDto;
+import com.jay.cvproject.dtos.SearchCriteria;
 import com.jay.cvproject.mappers.ProductMapper;
 import com.jay.cvproject.models.Product;
 import com.jay.cvproject.repository.ProductRepository;
+import com.jay.cvproject.utilities.ProductSearchQueryCriteriaConsumer;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,10 +23,12 @@ import java.util.stream.StreamSupport;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapp) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMap) {
         this.productRepository = productRepository;
-        this.productMapper = productMapp;
+        this.productMapper = productMap;
     }
 
     public List<ProductDto> findAll() {
@@ -45,4 +55,25 @@ public class ProductService {
     public void deleteById(Long id) {
         productRepository.deleteById(id);
     }
+
+    public List<ProductDto> searchProduct(List<SearchCriteria> params) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Product> query = builder.createQuery(Product.class);
+        Root<Product> r = query.from(Product.class);
+
+        Predicate predicate = builder.conjunction();
+
+        ProductSearchQueryCriteriaConsumer searchConsumer =
+                new ProductSearchQueryCriteriaConsumer(predicate, builder, r);
+        params.forEach(searchConsumer);
+        predicate = searchConsumer.getPredicate();
+        query.where(predicate);
+
+        List<Product> result = entityManager.createQuery(query).getResultList();
+        return result
+                .stream()
+                .map(productMapper::entityToDto)
+                .collect(Collectors.toList());
+    }
+
 }
