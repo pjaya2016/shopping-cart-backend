@@ -44,7 +44,7 @@ public class ProductController implements Base {
     }
 
     @GetMapping("/product/{id}")
-    public ProductDto findById(Long id) {
+    public ProductDto findById(@PathVariable Long id) {
         return productService.findById(id);
     }
 
@@ -60,5 +60,6 @@ public class ProductController implements Base {
     public void deleteProduct(@PathVariable Long id) {
         productService.deleteById(id);
     }
+
 
 }

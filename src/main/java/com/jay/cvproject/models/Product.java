@@ -35,4 +35,7 @@ public class Product {
     )
     private List<Image> images = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Cart cart;
+
 }

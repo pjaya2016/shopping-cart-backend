@@ -1,9 +1,9 @@
 package com.jay.cvproject.repository;
 
-import com.jay.cvproject.models.PostReview;
+import com.jay.cvproject.models.Payment;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PostReviewRepository extends PagingAndSortingRepository<PostReview, Long> {
+public interface PaymentRepository extends PagingAndSortingRepository<Payment, Long> {
 }

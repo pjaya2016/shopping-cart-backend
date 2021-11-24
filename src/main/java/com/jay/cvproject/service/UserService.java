@@ -79,4 +79,11 @@ public class UserService {
             roleRepository.save(role);
         }
     }
+
+    public UserDto findById(Long userId) {
+        return userMapper
+                .entityToDto(userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User id not found")));
+    }
 }
