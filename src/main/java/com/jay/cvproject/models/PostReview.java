@@ -1,7 +1,5 @@
 package com.jay.cvproject.models;
 
-import com.jay.cvproject.models.auth.User;
-
 import javax.persistence.*;
 
 @Entity

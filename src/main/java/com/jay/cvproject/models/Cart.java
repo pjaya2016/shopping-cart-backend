@@ -1,6 +1,6 @@
 package com.jay.cvproject.models;
 
-import com.jay.cvproject.models.auth.User;
+import com.jay.cvproject.models.auth.AuthUser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -21,7 +21,7 @@ public class Cart {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    private User user;
+    private AuthUser authUser;
 
     @OneToMany(
             mappedBy = "cart",

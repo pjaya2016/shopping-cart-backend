@@ -7,4 +7,5 @@ import lombok.EqualsAndHashCode;
 @Data
 public class RegisterDto extends UserDto {
     private String password;
+    private String secret;
 }

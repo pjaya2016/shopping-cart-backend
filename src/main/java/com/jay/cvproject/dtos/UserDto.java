@@ -10,4 +10,5 @@ public class UserDto {
     private boolean enabled;
     private String token;
     private int expiresIn;
+    private boolean twoFactorEnabled;
 }

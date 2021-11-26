@@ -4,7 +4,7 @@ import com.jay.cvproject.mappers.ProductMapper;
 import com.jay.cvproject.mappers.UserMapper;
 import com.jay.cvproject.models.Cart;
 import com.jay.cvproject.models.Product;
-import com.jay.cvproject.models.auth.User;
+import com.jay.cvproject.models.auth.AuthUser;
 import com.jay.cvproject.service.CartService;
 import com.jay.cvproject.service.ProductService;
 import com.jay.cvproject.service.UserService;
@@ -41,9 +41,9 @@ public class CartController {
                 .map(productMapper::dtoToEntity)
                 .collect(Collectors.toList());
 
-        User user = userMapper.dtoToEntity(userService.findById(userId));
+        AuthUser authUser = userMapper.dtoToEntity(userService.findById(userId));
         entity.setProduct(products);
-        entity.setUser(user);
+        entity.setAuthUser(authUser);
         return cartService.save(entity);
     }
 }

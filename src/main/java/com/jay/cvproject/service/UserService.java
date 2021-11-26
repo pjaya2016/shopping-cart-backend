@@ -1,18 +1,21 @@
 package com.jay.cvproject.service;
 
+import com.google.zxing.WriterException;
 import com.jay.cvproject.dtos.RegisterDto;
 import com.jay.cvproject.dtos.UserDto;
 import com.jay.cvproject.mappers.UserMapper;
+import com.jay.cvproject.models.auth.AuthUser;
 import com.jay.cvproject.models.auth.Privilege;
 import com.jay.cvproject.models.auth.Role;
-import com.jay.cvproject.models.auth.User;
 import com.jay.cvproject.repository.auth.PrivilegeRepository;
 import com.jay.cvproject.repository.auth.RoleRepository;
 import com.jay.cvproject.repository.auth.UserRepository;
+import com.jay.cvproject.utilities.GoogleAuth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,11 +23,13 @@ import java.util.List;
 
 @Service
 public class UserService {
+    public static final String COMPANY_NAME = "JayCvProject";
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
     private final PasswordEncoder passwordEncoder;
+
 
     public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, PrivilegeRepository privilegeRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -32,6 +37,7 @@ public class UserService {
         this.roleRepository = roleRepository;
         this.privilegeRepository = privilegeRepository;
         this.passwordEncoder = passwordEncoder;
+
     }
 
     public UserDto save(RegisterDto dto) {
@@ -46,16 +52,24 @@ public class UserService {
         createRoleIfNotFound("ROLE_USER", Collections.singletonList(readPrivilege));
 
         Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-        User entity = userMapper.dtoToEntity(dto);
+        AuthUser entity = userMapper.dtoToEntity(dto);
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+        entity.setSecret(dto.getSecret());
         entity.setRoles(Collections.singletonList(adminRole));
         return userMapper.entityToDto(userRepository.save(entity));
     }
 
     public UserDto findByEmail(String email) {
-        User entity = userRepository.findByEmail(email)
+        return userRepository
+                .findByEmail(email)
+                .map(userMapper::entityToDto)
+                .orElse(null);
+    }
+
+    public String getSecretOfUser(String email) {
+        AuthUser entity = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Email does not exists"));
-        return userMapper.entityToDto(entity);
+        return entity.getSecret();
     }
 
     @Transactional
@@ -85,5 +99,17 @@ public class UserService {
                 .entityToDto(userRepository
                         .findById(userId)
                         .orElseThrow(() -> new RuntimeException("User id not found")));
+    }
+
+    public byte[] register2factor(RegisterDto registerDto) throws IOException, WriterException {
+        String secretKey = GoogleAuth.generateSecretKey();
+        registerDto.setSecret(secretKey);
+        registerDto.setTwoFactorEnabled(true);
+        save(registerDto);
+        return GoogleAuth
+                .generateQrCodeWithUrl(
+                        registerDto.getEmail(),
+                        secretKey,
+                        COMPANY_NAME);
     }
 }

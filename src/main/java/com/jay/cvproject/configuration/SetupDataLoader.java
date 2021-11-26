@@ -1,8 +1,8 @@
 package com.jay.cvproject.configuration;
 
+import com.jay.cvproject.models.auth.AuthUser;
 import com.jay.cvproject.models.auth.Privilege;
 import com.jay.cvproject.models.auth.Role;
-import com.jay.cvproject.models.auth.User;
 import com.jay.cvproject.repository.auth.PrivilegeRepository;
 import com.jay.cvproject.repository.auth.RoleRepository;
 import com.jay.cvproject.repository.auth.UserRepository;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.util.Arrays;
@@ -18,7 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@Component
+
 public class SetupDataLoader implements
         ApplicationListener<ContextRefreshedEvent> {
 
@@ -55,14 +54,14 @@ public class SetupDataLoader implements
         createRoleIfNotFound("ROLE_USER", Collections.singletonList(readPrivilege));
 
         Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-        User user = new User();
-        user.setFirstName("Test");
-        user.setLastName("Test");
-        user.setPassword(passwordEncoder.encode("test"));
-        user.setEmail("test@test.com");
-        user.setRoles(Collections.singletonList(adminRole));
-        user.setEnabled(true);
-        userRepository.save(user);
+        AuthUser authUser = new AuthUser();
+        authUser.setFirstName("Test");
+        authUser.setLastName("Test");
+        authUser.setPassword(passwordEncoder.encode("test"));
+        authUser.setEmail("test@test.com");
+        authUser.setRoles(Collections.singletonList(adminRole));
+        authUser.setEnabled(true);
+        userRepository.save(authUser);
 
         alreadySetup = true;
     }

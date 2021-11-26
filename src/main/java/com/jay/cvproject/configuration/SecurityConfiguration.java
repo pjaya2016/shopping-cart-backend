@@ -1,8 +1,13 @@
 package com.jay.cvproject.configuration;
 
 import com.jay.cvproject.filters.JWTAuthorizationFilter;
+import com.jay.cvproject.service.SecretService;
+import com.jay.cvproject.utilities.AES;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -14,18 +19,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private final SecretService secretService;
+
+    public SecurityConfiguration(SecretService secretService) {
+        this.secretService = secretService;
+    }
+
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public RunAfterStartup runAfterStartup() {
+        return new RunAfterStartup(secretService);
+    }
+
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    @DependsOn("runAfterStartup")
+    public AES aes() {
+        return new AES(secretService);
+    }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

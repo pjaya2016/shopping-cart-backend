@@ -9,7 +9,7 @@ import java.util.Collection;
 @Entity
 @Getter
 @Setter
-public class User {
+public class AuthUser {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -20,6 +20,8 @@ public class User {
     private String password;
     private boolean enabled;
     private boolean tokenExpired;
+    private boolean twoFactorEnabled;
+    private String secret;
 
     @ManyToMany
     @JoinTable(

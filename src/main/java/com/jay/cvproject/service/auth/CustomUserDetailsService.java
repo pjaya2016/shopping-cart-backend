@@ -1,8 +1,8 @@
 package com.jay.cvproject.service.auth;
 
+import com.jay.cvproject.models.auth.AuthUser;
 import com.jay.cvproject.models.auth.Privilege;
 import com.jay.cvproject.models.auth.Role;
-import com.jay.cvproject.models.auth.User;
 import com.jay.cvproject.repository.auth.RoleRepository;
 import com.jay.cvproject.repository.auth.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,9 +32,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByEmail(username)
+        AuthUser authUser = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("Email not found"));
-        if (user == null) {
+        if (authUser == null) {
             return new org.springframework.security.core.userdetails.User(
                     " ", " ", true, true, true, true,
                     getAuthorities(Collections.singletonList(
@@ -42,8 +42,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(), user.getPassword(), user.isEnabled(), true, true,
-                true, getAuthorities(user.getRoles()));
+                authUser.getEmail(), authUser.getPassword(), authUser.isEnabled(), true, true,
+                true, getAuthorities(authUser.getRoles()));
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(
