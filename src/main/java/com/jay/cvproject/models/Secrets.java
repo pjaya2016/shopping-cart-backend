@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,27 +26,23 @@ public class Secrets {
 
     private String appId;
     private String secretKey;
-    private String salt;
+    private byte[] generateIv;
 
     public Secrets(String appId) throws NoSuchAlgorithmException {
         this.appId = appId;
         this.secretKey = genSecretKey();
-        this.salt = genNextSalt();
+        this.generateIv = generateIv().getIV();
     }
 
-    public String genNextSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[20];
-        random.nextBytes(bytes);
-        return Base64
-                .getEncoder()
-                .encodeToString(bytes);
+    private IvParameterSpec generateIv() {
+        byte[] iv = new byte[16];
+        new SecureRandom().nextBytes(iv);
+        return new IvParameterSpec(iv);
     }
 
-    public String genSecretKey() throws NoSuchAlgorithmException {
-        SecretKey secretKey = KeyGenerator.getInstance("AES").generateKey();
-        return Base64
-                .getEncoder()
-                .encodeToString(secretKey.getEncoded());
+    private String genSecretKey() throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        return Base64.getEncoder().encodeToString(keyGenerator.generateKey().getEncoded());
     }
 }

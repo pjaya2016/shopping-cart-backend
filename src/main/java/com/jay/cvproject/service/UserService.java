@@ -10,12 +10,20 @@ import com.jay.cvproject.models.auth.Role;
 import com.jay.cvproject.repository.auth.PrivilegeRepository;
 import com.jay.cvproject.repository.auth.RoleRepository;
 import com.jay.cvproject.repository.auth.UserRepository;
+import com.jay.cvproject.utilities.AES;
 import com.jay.cvproject.utilities.GoogleAuth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,15 +37,16 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PrivilegeRepository privilegeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AES aes;
 
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, PrivilegeRepository privilegeRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository, PrivilegeRepository privilegeRepository, PasswordEncoder passwordEncoder, AES aes) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.roleRepository = roleRepository;
         this.privilegeRepository = privilegeRepository;
         this.passwordEncoder = passwordEncoder;
-
+        this.aes = aes;
     }
 
     public UserDto save(RegisterDto dto) {
@@ -101,9 +110,10 @@ public class UserService {
                         .orElseThrow(() -> new RuntimeException("User id not found")));
     }
 
-    public byte[] register2factor(RegisterDto registerDto) throws IOException, WriterException {
+    public byte[] register2factor(RegisterDto registerDto) throws IOException, WriterException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, InvalidKeyException {
         String secretKey = GoogleAuth.generateSecretKey();
-        registerDto.setSecret(secretKey);
+        //AES.encrypt(originalString, secretKey)
+        registerDto.setSecret(aes.encrypt(secretKey));
         registerDto.setTwoFactorEnabled(true);
         save(registerDto);
         return GoogleAuth

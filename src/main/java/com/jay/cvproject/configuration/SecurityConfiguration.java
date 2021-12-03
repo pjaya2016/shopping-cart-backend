@@ -20,6 +20,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.security.NoSuchAlgorithmException;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -37,7 +39,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public RunAfterStartup runAfterStartup() {
+    public RunAfterStartup runAfterStartup() throws NoSuchAlgorithmException {
         return new RunAfterStartup(secretService);
     }
 

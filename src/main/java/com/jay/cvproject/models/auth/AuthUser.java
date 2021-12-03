@@ -23,6 +23,7 @@ public class AuthUser {
     private boolean twoFactorEnabled;
     private String secret;
 
+
     @ManyToMany
     @JoinTable(
             name = "users_roles",
